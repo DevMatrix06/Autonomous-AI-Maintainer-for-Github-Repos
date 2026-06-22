@@ -1,5 +1,18 @@
+import re
 import subprocess
 import os
+from pathlib import Path
+
+# pylint error line format: path:line:col: Exxxx: message
+_PYLINT_ERROR_RE = re.compile(r"^(.+):(\d+):\d+: E\d+: (.+)$")
+
+
+def _is_ignored(path: Path):
+    return any(
+        part in path.parts
+        for part in ("__pycache__", ".venv", "venv", ".git")
+    ) or path.suffix == ".pyc"
+
 
 def run_static_analysis(repo_path):
     """
@@ -13,12 +26,13 @@ def run_static_analysis(repo_path):
     py_files = []
     for root, _, files in os.walk(repo_path):
         for f in files:
-            if f.endswith(".py"):
-                py_files.append(os.path.join(root, f))
+            path = Path(root) / f
+            if path.suffix == ".py" and not _is_ignored(path):
+                py_files.append(str(path))
 
     for file_path in py_files:
 
-        # 1️⃣ PURE SYNTAX CHECK (catches ;;;;)
+        # 1. PURE SYNTAX CHECK (catches ;;;;)
         syntax = subprocess.run(
             ["python", "-m", "py_compile", file_path],
             capture_output=True,
@@ -33,9 +47,9 @@ def run_static_analysis(repo_path):
             })
             continue  # no need to lint broken syntax
 
-        # 2️⃣ PYLINT (OPTIONAL, SAFE)
+        # 2. PYLINT (OPTIONAL, SAFE)
         try:
-            subprocess.run(
+            result = subprocess.run(
                 [
                     "python",
                     "-m",
@@ -47,6 +61,15 @@ def run_static_analysis(repo_path):
                 capture_output=True,
                 text=True
             )
+            for line in result.stdout.splitlines():
+                m = _PYLINT_ERROR_RE.match(line)
+                if m:
+                    issues.append({
+                        "type": "PYLINT_ERROR",
+                        "file": os.path.abspath(m.group(1)),
+                        "line": int(m.group(2)),
+                        "message": m.group(3).strip()
+                    })
         except FileNotFoundError:
             # pylint not installed → ignore
             pass

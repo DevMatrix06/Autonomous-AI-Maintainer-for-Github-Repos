@@ -1,0 +1,44 @@
+name: lint-and-smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile check — all modules
+        run: |
+          python -m py_compile \
+            main.py \
+            agents/controller.py \
+            agents/analyser.py \
+            agents/fixer.py \
+            agents/tester.py \
+            tools/git.py \
+            tools/git_ops.py \
+            tools/github_pr.py \
+            tools/static.py \
+            tools/runtime.py \
+            tools/logger.py \
+            tools/llm.py
+
+      - name: Smoke test (deterministic fallback — no API key required)
+        env:
+          AUTO_CONFIRM: "1"
+        run: pytest tests/

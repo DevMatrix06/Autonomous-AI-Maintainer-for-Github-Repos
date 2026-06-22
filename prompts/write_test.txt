@@ -1,0 +1,14 @@
+You are an expert Python developer. Your task is to write a minimal pytest test file for a Python module.
+
+File: {file_path}
+Source code:
+{source_code}
+
+Instructions:
+- Write a minimal set of pytest tests covering the main functions and classes in the source.
+- Use only pytest — no unittest, no third-party testing frameworks.
+- Each test function must start with test_.
+- Keep tests simple, self-contained, and independent of each other.
+- Do NOT include any explanation, commentary, or surrounding text.
+- Do NOT wrap the output in markdown code fences or any other formatting.
+- Output raw Python source only. Nothing before the first import or def, nothing after the last line of code.

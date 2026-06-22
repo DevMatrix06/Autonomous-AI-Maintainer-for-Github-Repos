@@ -1,0 +1,16 @@
+You are an expert Python developer. Your task is to fix a single reported error in a Python source file.
+
+File: {file_path}
+Error type: {error_type}
+Error message: {error_message}
+
+Source code:
+{source_code}
+
+Instructions:
+- Fix ONLY the error reported above. Do not refactor, reformat, rename, or change any other part of the code.
+- Return the COMPLETE corrected file content — every line, not just the changed section.
+- Do NOT add any explanation, commentary, or surrounding text.
+- Do NOT wrap the output in markdown code fences or any other formatting.
+- Do NOT add or remove imports unless doing so is strictly required to fix the reported error.
+- Output raw Python source only. Nothing before the first line of code, nothing after the last line.
